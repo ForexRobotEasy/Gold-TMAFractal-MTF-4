@@ -1,0 +1,124 @@
+mql5
+//+------------------------------------------------------------------+
+//| Gold TMAFractal MTF 4                                            |
+//| Developer: Forex Robot Easy Team                                 |
+//| Website: forexroboteasy.com                                      |
+//+------------------------------------------------------------------+
+
+#property copyright 'Forex Robot Easy Team'
+#property link    'forexroboteasy.com'
+
+//+------------------------------------------------------------------+
+//| Indicator input parameters                                       |
+//+------------------------------------------------------------------+
+input int period = 20; // Period for TMA calculation
+input int timeframe = PERIOD_H1; // Timeframe for analysis
+
+//+------------------------------------------------------------------+
+//| Indicator buffers                                                 |
+//+------------------------------------------------------------------+
+double buffer_main[];
+double buffer_entry_zone[];
+
+//+------------------------------------------------------------------+
+//| Indicator initialization function                                 |
+//+------------------------------------------------------------------+
+int OnInit()
+{
+    // Indicator buffers mapping
+    SetIndexBuffer(0, buffer_main);
+    SetIndexBuffer(1, buffer_entry_zone);
+
+    // Indicator labels
+    IndicatorDigits(Digits);
+    SetIndexStyle(0, DRAW_ARROW);
+    SetIndexArrow(0, 159);
+    SetIndexStyle(1, DRAW_LINE);
+
+    // Indicator settings
+    SetIndexLabel(0, 'Main Signal');
+    SetIndexLabel(1, 'Entry Zone');
+
+    return(INIT_SUCCEEDED);
+}
+
+//+------------------------------------------------------------------+
+//| Custom indicator iteration function                               |
+//+------------------------------------------------------------------+
+int OnCalculate(const int rates_total, const int prev_calculated, const datetime &time[], const double &open[], const double &high[], const double &low[], const double &close[], const long &tick_volume[], const long &volume[], const int &spread[])
+{
+    int limit = rates_total - prev_calculated;
+    
+    // Calculate TMA
+    int tma_calculated = iCustom(NULL, timeframe, 'TMA', period, 0, 0);
+    
+    if (tma_calculated < limit)
+    {
+        Print('TMA indicator not calculated');
+        return(0);
+    }
+    
+    // Calculate fractals
+    int fractal_calculated = iFractals(NULL, timeframe, MODE_UPPER, 2);
+    
+    if (fractal_calculated < limit)
+    {
+        Print('Fractal indicator not calculated');
+        return(0);
+    }
+    
+    // Generate signals
+    for (int i = limit; i >= 0; i--)
+    {
+        // Check for confirmed arrow signal
+        if (IsConfirmedSignal(i))
+        {
+            buffer_main[i] = GetSignalType(i);
+            buffer_entry_zone[i] = GetEntryZone(i);
+        }
+        else // Check for fractal signal
+        {
+            buffer_main[i] = GetFractalSignal(i);
+            buffer_entry_zone[i] = 0;
+        }
+    }
+
+    // Return the number of calculated bars
+    return(rates_total);
+}
+
+//+------------------------------------------------------------------+
+//| Check if the signal is confirmed                                  |
+//+------------------------------------------------------------------+
+bool IsConfirmedSignal(int index)
+{
+    // Logic to check if the signal is confirmed
+    // ...
+}
+
+//+------------------------------------------------------------------+
+//| Get the type of signal                                            |
+//+------------------------------------------------------------------+
+int GetSignalType(int index)
+{
+    // Logic to determine the type of signal
+    // ...
+}
+
+//+------------------------------------------------------------------+
+//| Get the entry zone for potential trades                           |
+//+------------------------------------------------------------------+
+double GetEntryZone(int index)
+{
+    // Logic to calculate the entry zone
+    // ...
+}
+
+//+------------------------------------------------------------------+
+//| Get the fractal signal                                            |
+//+------------------------------------------------------------------+
+int GetFractalSignal(int index)
+{
+    // Logic to calculate the fractal signal
+    // ...
+}
